@@ -34,51 +34,68 @@ struct SwipeMatchView: View {
   @State private var currentIndex: Int = 0
   @State private var showMatch = false
   var body: some View {
-    VStack {
-      Spacer()
+    ZStack {
+      Color(red: 245 / 255, green: 245 / 255, blue: 245 / 255).ignoresSafeArea()
       if currentIndex < profiles.count {
         let profile = profiles[currentIndex]
-        VStack(spacing: 16) {
-          profile.image
-            .resizable()
-            .scaledToFill()
-            .frame(width: 220, height: 300)
-            .clipped()
-            .cornerRadius(24)
-          Text("\(profile.name), \(profile.age)")
-            .font(.title)
-            .bold()
-          Text(profile.bio)
-            .font(.body)
-            .foregroundColor(.gray)
-            .multilineTextAlignment(.center)
+        VStack {
+          Spacer()
+          ZStack(alignment: .bottom) {
+            profile.image
+              .resizable()
+              .scaledToFill()
+              .frame(width: 260, height: 360)
+              .clipped()
+              .cornerRadius(32)
+              .shadow(radius: 12)
+            VStack(alignment: .leading, spacing: 8) {
+              Text("\(profile.name), \(profile.age)")
+                .font(.title2)
+                .bold()
+                .foregroundColor(.primary)
+              Text(profile.bio)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .lineLimit(2)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+              RoundedRectangle(cornerRadius: 28).fill(.ultraThinMaterial).shadow(radius: 4)
+            )
+            .offset(y: 24)
+          }
+          .frame(width: 260, height: 400)
+          .padding(.bottom, 32)
+          HStack(spacing: 40) {
+            Button(action: { swipeLeft() }) {
+              Image(systemName: "xmark.circle.fill")
+                .resizable()
+                .frame(width: 44, height: 44)
+                .foregroundColor(.red)
+                .background(Circle().fill(.ultraThinMaterial).shadow(radius: 2))
+            }
+            Button(action: { swipeRight() }) {
+              Image(systemName: "heart.circle.fill")
+                .resizable()
+                .frame(width: 44, height: 44)
+                .foregroundColor(.green)
+                .background(Circle().fill(.ultraThinMaterial).shadow(radius: 2))
+            }
+          }
+          .padding(.top, -16)
+          Spacer()
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 32).fill(Color.white).shadow(radius: 8))
-        .padding(.horizontal, 32)
       } else {
-        Text("No more profiles!")
-          .font(.title2)
-          .foregroundColor(.gray)
-      }
-      Spacer()
-      HStack(spacing: 40) {
-        Button(action: { swipeLeft() }) {
-          Image(systemName: "xmark.circle.fill")
-            .resizable()
-            .frame(width: 40, height: 40)
-            .foregroundColor(.red)
-        }
-        Button(action: { swipeRight() }) {
-          Image(systemName: "heart.circle.fill")
-            .resizable()
-            .frame(width: 40, height: 40)
-            .foregroundColor(.green)
+        VStack {
+          Spacer()
+          Text("No more profiles!")
+            .font(.title2)
+            .foregroundColor(.gray)
+          Spacer()
         }
       }
-      .padding(.bottom, 48)
     }
-    .background(Color(red: 245 / 255, green: 245 / 255, blue: 245 / 255).ignoresSafeArea())
     .alert(isPresented: $showMatch) {
       Alert(
         title: Text("It's a match!"),

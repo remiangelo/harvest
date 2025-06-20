@@ -17,8 +17,11 @@ struct ChatView: View {
                 .foregroundColor(.gray)
               Text(msg)
                 .padding(12)
-                .background(Color.gray.opacity(0.15))
-                .cornerRadius(16)
+                .background(RoundedRectangle(cornerRadius: 16).fill(.ultraThinMaterial))
+                .overlay(
+                  RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                )
             }
           }
         }
@@ -26,16 +29,21 @@ struct ChatView: View {
       }
       HStack {
         TextField("Type a message...", text: $input)
-          .textFieldStyle(RoundedBorderTextFieldStyle())
+          .textFieldStyle(PlainTextFieldStyle())
+          .padding(10)
+          .background(RoundedRectangle(cornerRadius: 16).fill(.ultraThinMaterial))
         Button(action: sendMessage) {
           Image(systemName: "paperplane.fill")
             .font(.title2)
             .foregroundColor(.accentColor)
+            .padding(10)
+            .background(RoundedRectangle(cornerRadius: 16).fill(.ultraThinMaterial))
         }
         .disabled(input.isEmpty)
       }
       .padding()
     }
+    .background(Color(.systemBackground).ignoresSafeArea())
   }
   private func sendMessage() {
     guard !input.isEmpty else { return }
