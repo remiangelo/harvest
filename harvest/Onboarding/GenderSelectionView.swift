@@ -3,7 +3,7 @@ import SwiftUI
 struct GenderSelectionView: View {
   @ObservedObject var onboardingData: OnboardingData
   var onContinue: () -> Void = {}
-  let genders = ["Asexual", "Bisexual", "Gay", "Intersex", "Lesbian", "Trans"]
+  let genders = ["Asexual", "Bisexual", "Gay", "Intersex", "Lesbian", "Trans", "Straight"]
   var body: some View {
     VStack {
       ProgressBar(progress: 0.4)

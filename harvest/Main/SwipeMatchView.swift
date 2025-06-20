@@ -66,13 +66,13 @@ struct SwipeMatchView: View {
         Button(action: { swipeLeft() }) {
           Image(systemName: "xmark.circle.fill")
             .resizable()
-            .frame(width: 56, height: 56)
+            .frame(width: 40, height: 40)
             .foregroundColor(.red)
         }
         Button(action: { swipeRight() }) {
           Image(systemName: "heart.circle.fill")
             .resizable()
-            .frame(width: 56, height: 56)
+            .frame(width: 40, height: 40)
             .foregroundColor(.green)
         }
       }
