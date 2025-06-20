@@ -1,127 +1,216 @@
 import SwiftUI
 
 struct SwipeMatchView: View {
-  struct Profile: Identifiable {
-    let id = UUID()
-    let name: String
-    let age: Int
-    let bio: String
-    let image: Image
-  }
-  @State private var profiles: [Profile] = [
-    Profile(
-      name: "Alex", age: 25, bio: "Love hiking and art.",
-      image: Image(systemName: "person.crop.square")),
-    Profile(
-      name: "Sam", age: 28, bio: "Coffee enthusiast and bookworm.",
-      image: Image(systemName: "person.crop.square")),
-    Profile(
-      name: "Jamie", age: 22, bio: "Music is my life!",
-      image: Image(systemName: "person.crop.square")),
-    Profile(
-      name: "Taylor", age: 30, bio: "Dog lover and foodie.",
-      image: Image(systemName: "person.crop.square")),
-    Profile(
-      name: "Jordan", age: 27, bio: "Runner, reader, and traveler.",
-      image: Image(systemName: "person.crop.square")),
-    Profile(
-      name: "Morgan", age: 24, bio: "Tech enthusiast and gamer.",
-      image: Image(systemName: "person.crop.square")),
-    Profile(
-      name: "Casey", age: 29, bio: "Yoga, meditation, and mindfulness.",
-      image: Image(systemName: "person.crop.square")),
-  ]
+  @ObservedObject var onboardingData: OnboardingData
   @State private var currentIndex: Int = 0
-  @State private var showMatch = false
+  @State private var showMatch: Bool = false
+  let profiles: [Profile] = [
+    Profile(
+      name: "Alex", age: 25, pronouns: "they/them", hobbies: ["Art", "Music"], bio: "Painter & DJ.",
+      image: "profile1"),
+    Profile(
+      name: "Sam", age: 28, pronouns: "she/her", hobbies: ["Hiking", "Cooking"],
+      bio: "Nature lover.", image: "profile2"),
+    Profile(
+      name: "Jordan", age: 23, pronouns: "he/him", hobbies: ["Gaming", "Fitness"],
+      bio: "Leveling up IRL.", image: "profile3"),
+  ]
+  var onBack: () -> Void = {}
   var body: some View {
     ZStack {
-      Color(red: 245 / 255, green: 245 / 255, blue: 245 / 255).ignoresSafeArea()
-      if currentIndex < profiles.count {
-        let profile = profiles[currentIndex]
-        VStack {
+      LinearGradient(
+        gradient: Gradient(colors: [Color(.systemBackground), Color(.secondarySystemBackground)]),
+        startPoint: .top, endPoint: .bottom
+      )
+      .ignoresSafeArea()
+      VStack {
+        HStack {
+          Button(action: onBack) {
+            Image(systemName: "chevron.left")
+              .font(.system(size: 22, weight: .bold))
+              .foregroundColor(.primary)
+              .padding(10)
+              .background(Circle().fill(.ultraThinMaterial).opacity(0.7))
+          }
           Spacer()
+          Text("Discover")
+            .font(.system(size: 28, weight: .bold, design: .rounded))
+            .foregroundColor(.primary)
+          Spacer().frame(width: 44)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 24)
+        .padding(.bottom, 8)
+        Spacer()
+        if currentIndex < profiles.count {
+          let profile = profiles[currentIndex]
           ZStack(alignment: .bottom) {
-            profile.image
+            Image(profile.image)
               .resizable()
               .scaledToFill()
-              .frame(width: 260, height: 360)
-              .clipped()
-              .cornerRadius(32)
-              .shadow(radius: 12)
-            VStack(alignment: .leading, spacing: 8) {
-              Text("\(profile.name), \(profile.age)")
-                .font(.title2)
-                .bold()
+              .frame(height: 420)
+              .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
+            VStack(alignment: .leading, spacing: 10) {
+              Text(profile.name)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
-              Text(profile.bio)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .lineLimit(2)
+              HStack(spacing: 10) {
+                Text("\(profile.age)")
+                  .font(.system(size: 18, weight: .medium, design: .rounded))
+                  .foregroundColor(.secondary)
+                Text(profile.pronouns)
+                  .font(.system(size: 16, weight: .medium, design: .rounded))
+                  .foregroundColor(.secondary)
+                  .padding(.horizontal, 12)
+                  .padding(.vertical, 5)
+                  .background(
+                    Capsule()
+                      .fill(.ultraThinMaterial)
+                      .opacity(0.7)
+                      .overlay(
+                        LinearGradient(
+                          gradient: Gradient(colors: [
+                            Color.pink.opacity(0.18), Color.blue.opacity(0.14), Color.clear,
+                          ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                        )
+                        .blendMode(.plusLighter)
+                      )
+                  )
+              }
+              if !profile.bio.isEmpty {
+                Text(profile.bio)
+                  .font(.system(size: 15, weight: .regular, design: .rounded))
+                  .foregroundColor(.primary)
+              }
+              if !profile.hobbies.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                  HStack(spacing: 8) {
+                    ForEach(profile.hobbies, id: \.self) { hobby in
+                      Text(hobby)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 14)
+                        .background(
+                          Capsule()
+                            .fill(.ultraThinMaterial)
+                            .opacity(0.8)
+                            .overlay(
+                              LinearGradient(
+                                gradient: Gradient(colors: [
+                                  Color.pink.opacity(0.18), Color.blue.opacity(0.14), Color.clear,
+                                ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                              )
+                              .blendMode(.plusLighter)
+                            )
+                        )
+                    }
+                  }
+                  .padding(.horizontal, 4)
+                }
+              }
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
             .background(
-              RoundedRectangle(cornerRadius: 28).fill(.ultraThinMaterial).shadow(radius: 4)
+              RoundedRectangle(cornerRadius: 32, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .opacity(0.7)
+                .overlay(
+                  LinearGradient(
+                    gradient: Gradient(colors: [
+                      Color.pink.opacity(0.13), Color.blue.opacity(0.10), Color.clear,
+                    ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                  )
+                  .blendMode(.plusLighter)
+                )
+                .shadow(color: .black.opacity(0.10), radius: 8, x: 0, y: 4)
             )
-            .offset(y: 24)
+            .padding(.horizontal, 16)
           }
-          .frame(width: 260, height: 400)
+          .padding(.bottom, 24)
+          HStack(spacing: 32) {
+            Button(action: {
+              if currentIndex < profiles.count - 1 {
+                currentIndex += 1
+              }
+            }) {
+              Image(systemName: "xmark")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 32)
+                .background(
+                  Capsule()
+                    .fill(.ultraThinMaterial)
+                    .opacity(0.8)
+                    .overlay(
+                      LinearGradient(
+                        gradient: Gradient(colors: [
+                          Color.pink.opacity(0.18), Color.blue.opacity(0.14), Color.clear,
+                        ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                      )
+                      .blendMode(.plusLighter)
+                    )
+                )
+            }
+            Button(action: {
+              showMatch = true
+            }) {
+              Image(systemName: "heart.fill")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 32)
+                .background(
+                  Capsule()
+                    .fill(.ultraThinMaterial)
+                    .opacity(0.8)
+                    .overlay(
+                      LinearGradient(
+                        gradient: Gradient(colors: [
+                          Color.pink.opacity(0.18), Color.blue.opacity(0.14), Color.clear,
+                        ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                      )
+                      .blendMode(.plusLighter)
+                    )
+                )
+            }
+          }
           .padding(.bottom, 32)
-          HStack(spacing: 40) {
-            Button(action: { swipeLeft() }) {
-              Image(systemName: "xmark.circle.fill")
-                .resizable()
-                .frame(width: 44, height: 44)
-                .foregroundColor(.red)
-                .background(Circle().fill(.ultraThinMaterial).shadow(radius: 2))
-            }
-            Button(action: { swipeRight() }) {
-              Image(systemName: "heart.circle.fill")
-                .resizable()
-                .frame(width: 44, height: 44)
-                .foregroundColor(.green)
-                .background(Circle().fill(.ultraThinMaterial).shadow(radius: 2))
-            }
-          }
-          .padding(.top, -16)
-          Spacer()
-        }
-      } else {
-        VStack {
-          Spacer()
-          Text("No more profiles!")
-            .font(.title2)
-            .foregroundColor(.gray)
-          Spacer()
+        } else {
+          Text("No more profiles")
+            .font(.system(size: 24, weight: .bold, design: .rounded))
+            .foregroundColor(.secondary)
+            .padding(.top, 120)
         }
       }
-    }
-    .alert(isPresented: $showMatch) {
-      Alert(
-        title: Text("It's a match!"),
-        message: Text("You and \(profiles[currentIndex-1].name) have matched!"),
-        dismissButton: .default(Text("OK")))
-    }
-  }
-  private func swipeLeft() {
-    if currentIndex < profiles.count - 1 {
-      currentIndex += 1
-    } else {
-      currentIndex = profiles.count
-    }
-  }
-  private func swipeRight() {
-    if currentIndex < profiles.count - 1 {
-      currentIndex += 1
-      showMatch = true
-    } else {
-      currentIndex = profiles.count
+      .alert(isPresented: $showMatch) {
+        Alert(
+          title: Text("It's a Match!"),
+          message: Text("You and \(profiles[currentIndex].name) have matched."),
+          dismissButton: .default(
+            Text("Yay!"),
+            action: {
+              if currentIndex < profiles.count - 1 {
+                currentIndex += 1
+              }
+            }))
+      }
     }
   }
 }
 
+struct Profile {
+  let name: String
+  let age: Int
+  let pronouns: String
+  let hobbies: [String]
+  let bio: String
+  let image: String
+}
+
 struct SwipeMatchView_Previews: PreviewProvider {
   static var previews: some View {
-    SwipeMatchView()
+    SwipeMatchView(onboardingData: OnboardingData())
   }
 }

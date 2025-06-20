@@ -1,15 +1,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        NavigationStack {
-            OnboardingFlowView()
-        }
+  @StateObject var onboardingData = OnboardingData()
+  var body: some View {
+    NavigationStack {
+      OnboardingFlowView(onboardingData: onboardingData)
     }
+  }
 }
 
 struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-} 
+  static var previews: some View {
+    ContentView()
+  }
+}

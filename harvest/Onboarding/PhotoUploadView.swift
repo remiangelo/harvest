@@ -3,78 +3,107 @@ import SwiftUI
 struct PhotoUploadView: View {
   @ObservedObject var onboardingData: OnboardingData
   var onContinue: () -> Void = {}
-  let maxPhotos = 6
   @State private var showImagePicker = false
-  @State private var selectedImage: UIImage?
-  @State private var isLoading = false
-
   var body: some View {
-    VStack {
-      ProgressBar(progress: 0.9)
-        .padding(.top, 40)
-        .padding(.bottom, 32)
-      Text("Show your Best Self")
-        .font(.system(size: 28, weight: .bold))
-        .foregroundColor(.primary)
-        .padding(.horizontal)
-        .padding(.bottom, 8)
-      Text(
-        "Upload up to six of your best photos to make a fantastic first impression. Let your personality shine."
+    ZStack {
+      LinearGradient(
+        gradient: Gradient(colors: [Color(.systemBackground), Color(.secondarySystemBackground)]),
+        startPoint: .top, endPoint: .bottom
       )
-      .font(.system(size: 16))
-      .foregroundColor(.gray)
-      .padding(.horizontal)
-      .padding(.bottom, 16)
-      if isLoading {
-        ProgressView("Uploading...")
-          .padding(.vertical, 32)
-      }
-      LazyVGrid(
-        columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16
-      ) {
-        ForEach(0..<maxPhotos, id: \.self) { index in
+      .ignoresSafeArea()
+      VStack(spacing: 32) {
+        Spacer()
+        VStack(spacing: 18) {
+          Text("Profile Photo")
+            .font(.system(size: 32, weight: .bold, design: .rounded))
+            .foregroundColor(.primary)
+            .padding(.bottom, 2)
+          Text("Add a photo of yourself")
+            .font(.system(size: 16, weight: .medium, design: .rounded))
+            .foregroundColor(.secondary)
           ZStack {
-            if onboardingData.photos.indices.contains(index) {
-              Image(uiImage: onboardingData.photos[index])
+            RoundedRectangle(cornerRadius: 32, style: .continuous)
+              .fill(.ultraThinMaterial)
+              .opacity(0.7)
+              .overlay(
+                LinearGradient(
+                  gradient: Gradient(colors: [
+                    Color.pink.opacity(0.13), Color.blue.opacity(0.10), Color.clear,
+                  ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+                .blendMode(.plusLighter)
+              )
+              .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+            if let image = onboardingData.photos.first {
+              Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 90, height: 120)
-                .clipped()
-                .cornerRadius(12)
+                .frame(width: 140, height: 140)
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .overlay(
+                  RoundedRectangle(cornerRadius: 28).stroke(Color.white.opacity(0.7), lineWidth: 2))
             } else {
-              Button(action: { showImagePicker = true }) {
-                RoundedRectangle(cornerRadius: 12)
-                  .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                  .frame(width: 90, height: 120)
-                  .overlay(Image(systemName: "plus").font(.title).foregroundColor(.gray))
+              VStack(spacing: 8) {
+                Image(systemName: "person.crop.circle.badge.plus")
+                  .resizable()
+                  .scaledToFit()
+                  .frame(width: 60, height: 60)
+                  .foregroundColor(.secondary)
+                Text("Tap to upload")
+                  .font(.system(size: 16, weight: .medium, design: .rounded))
+                  .foregroundColor(.secondary)
               }
             }
           }
+          .frame(width: 160, height: 160)
+          .onTapGesture { showImagePicker = true }
         }
-      }
-      .padding(.horizontal)
-      .padding(.bottom, 32)
-      Spacer()
-      PrimaryButton(title: "Continue", action: onContinue)
+        .padding(24)
+        .background(
+          RoundedRectangle(cornerRadius: 32, style: .continuous)
+            .fill(.ultraThinMaterial)
+            .opacity(0.7)
+            .shadow(color: .black.opacity(0.10), radius: 8, x: 0, y: 4)
+        )
+        .padding(.horizontal, 24)
+        Spacer()
+        Button(action: onContinue) {
+          Text("Finish")
+            .font(.system(size: 18, weight: .semibold, design: .rounded))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+              Capsule()
+                .fill(.ultraThinMaterial)
+                .opacity(0.8)
+                .overlay(
+                  LinearGradient(
+                    gradient: Gradient(colors: [
+                      Color.pink.opacity(0.18), Color.blue.opacity(0.14), Color.clear,
+                    ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                  )
+                  .blendMode(.plusLighter)
+                )
+                .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
+            )
+        }
+        .padding(.horizontal, 48)
         .padding(.bottom, 32)
         .disabled(onboardingData.photos.isEmpty)
         .opacity(onboardingData.photos.isEmpty ? 0.5 : 1)
-    }
-    .background(Color.white.ignoresSafeArea())
-    .sheet(
-      isPresented: $showImagePicker,
-      onDismiss: {
-        if let img = selectedImage, onboardingData.photos.count < maxPhotos {
-          isLoading = true
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            onboardingData.photos.append(img)
-            selectedImage = nil
-            isLoading = false
-          }
-        }
       }
-    ) {
-      ImagePicker(image: $selectedImage)
+    }
+    .sheet(isPresented: $showImagePicker) {
+      ImagePicker(
+        image: Binding(
+          get: { onboardingData.photos.first },
+          set: { newImage in
+            if let img = newImage {
+              onboardingData.photos = [img]
+            }
+          }
+        ))
     }
   }
 }
@@ -98,8 +127,8 @@ struct ImagePicker: UIViewControllerRepresentable {
       _ picker: UIImagePickerController,
       didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
     ) {
-      if let uiImage = info[.originalImage] as? UIImage {
-        parent.image = uiImage
+      if let image = info[.originalImage] as? UIImage {
+        parent.image = image
       }
       picker.dismiss(animated: true)
     }

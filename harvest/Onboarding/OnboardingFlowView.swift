@@ -1,63 +1,68 @@
 import SwiftUI
 
-enum OnboardingStep: Int, CaseIterable {
-  case age, pronouns, nickname, gender, preference, relationshipGoals, hobbies, bio, photos
-}
-
 struct OnboardingFlowView: View {
-  @State private var step: OnboardingStep = .age
-  @StateObject private var onboardingData = OnboardingData()
-  @State private var onboardingComplete = false
-  @State private var showProfile = false
-
+  @ObservedObject var onboardingData: OnboardingData
+  @State private var step: Int = 0
+  var onFinish: () -> Void = {}
   var body: some View {
-    if showProfile {
-      ProfileCardView(onboardingData: onboardingData)
-    } else if onboardingComplete {
+    ZStack {
+      LinearGradient(
+        gradient: Gradient(colors: [Color(.systemBackground), Color(.secondarySystemBackground)]),
+        startPoint: .top, endPoint: .bottom
+      )
+      .ignoresSafeArea()
       VStack {
-        Spacer()
-        ProgressView("Loading your profile...")
-          .progressViewStyle(CircularProgressViewStyle())
-          .padding()
-        Spacer()
-      }
-      .onAppear {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-          showProfile = true
+        Spacer(minLength: 0)
+        Group {
+          switch step {
+          case 0:
+            AgeInputView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 1:
+            PronounSelectionView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 2:
+            NicknameInputView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 3:
+            GenderSelectionView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 4:
+            PreferenceSelectionView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 5:
+            RelationshipGoalsView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 6:
+            HobbiesSelectionView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 7:
+            BioInputView(onboardingData: onboardingData) {
+              withAnimation { step += 1 }
+            }
+          case 8:
+            PhotoUploadView(onboardingData: onboardingData) {
+              onFinish()
+            }
+          default:
+            EmptyView()
+          }
         }
+        Spacer(minLength: 0)
       }
-    } else {
-      VStack {
-        switch step {
-        case .age:
-          AgeInputView(onboardingData: onboardingData, onContinue: { step = .pronouns })
-        case .pronouns:
-          PronounSelectionView(onboardingData: onboardingData, onContinue: { step = .nickname })
-        case .nickname:
-          NicknameInputView(onboardingData: onboardingData, onContinue: { step = .gender })
-        case .gender:
-          GenderSelectionView(onboardingData: onboardingData, onContinue: { step = .preference })
-        case .preference:
-          PreferenceSelectionView(
-            onboardingData: onboardingData, onContinue: { step = .relationshipGoals })
-        case .relationshipGoals:
-          RelationshipGoalsView(onboardingData: onboardingData, onContinue: { step = .hobbies })
-        case .hobbies:
-          HobbiesSelectionView(onboardingData: onboardingData, onContinue: { step = .bio })
-        case .bio:
-          BioInputView(onboardingData: onboardingData, onContinue: { step = .photos })
-        case .photos:
-          PhotoUploadView(onboardingData: onboardingData, onContinue: { onboardingComplete = true })
-        }
-      }
-      .animation(.easeInOut, value: step)
-      .transition(.slide)
     }
   }
 }
 
 struct OnboardingFlowView_Previews: PreviewProvider {
   static var previews: some View {
-    OnboardingFlowView()
+    OnboardingFlowView(onboardingData: OnboardingData())
   }
 }

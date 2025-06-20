@@ -6,101 +6,147 @@ struct ProfileCardView: View {
   @State private var showEdit = false
   var body: some View {
     ZStack(alignment: .bottom) {
+      // Fullscreen, aspect-fill profile image
       if let firstPhoto = onboardingData.photos.first {
-        Image(uiImage: firstPhoto)
-          .resizable()
-          .scaledToFill()
-          .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.7)
-          .clipped()
+        GeometryReader { geo in
+          Image(uiImage: firstPhoto)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: geo.size.width, height: geo.size.height)
+            .clipped()
+            .ignoresSafeArea()
+        }
       } else {
-        Image(systemName: "person.crop.square")
-          .resizable()
-          .scaledToFill()
-          .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.7)
-          .clipped()
+        Color(.systemBackground)
+          .ignoresSafeArea()
       }
+      // Glass overlay with chromatic distortion
       VStack(alignment: .leading, spacing: 0) {
         Spacer()
-        VStack(alignment: .leading, spacing: 10) {
-          HStack(alignment: .firstTextBaseline, spacing: 8) {
+        VStack(alignment: .leading, spacing: 18) {
+          HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text(onboardingData.nickname.isEmpty ? "Your Name" : onboardingData.nickname)
-              .font(.system(size: 28, weight: .bold))
-              .foregroundColor(.white)
+              .font(.system(size: 34, weight: .bold, design: .rounded))
+              .foregroundColor(.primary)
             if let age = calculateAge(from: onboardingData.birthDate) {
               Text("\(age)")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.white.opacity(0.8))
+                .font(.system(size: 26, weight: .semibold, design: .rounded))
+                .foregroundColor(.secondary)
             }
             if !onboardingData.pronouns.isEmpty {
               Text(onboardingData.pronouns)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white.opacity(0.8))
+                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .foregroundColor(.secondary)
                 .padding(.leading, 4)
             }
           }
           HStack(spacing: 8) {
             Image(systemName: "location.fill")
-              .foregroundColor(.white.opacity(0.8))
-              .font(.system(size: 16))
+              .foregroundColor(.accentColor)
+              .font(.system(size: 18))
             Text("Location • Distance")
-              .font(.system(size: 16))
-              .foregroundColor(.white.opacity(0.8))
+              .font(.system(size: 18, weight: .medium, design: .rounded))
+              .foregroundColor(.secondary)
           }
           if !onboardingData.hobbies.isEmpty {
             ScrollView(.horizontal, showsIndicators: false) {
-              HStack(spacing: 8) {
+              HStack(spacing: 10) {
                 ForEach(onboardingData.hobbies, id: \.self) { tag in
                   Text("#\(tag)")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(.white)
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 10)
-                    .background(Color.white.opacity(0.2))
-                    .cornerRadius(12)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 14)
+                    .background(
+                      Capsule()
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.65)
+                        .overlay(
+                          LinearGradient(
+                            gradient: Gradient(colors: [
+                              Color.pink.opacity(0.15), Color.blue.opacity(0.12), Color.clear,
+                            ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                          )
+                          .blendMode(.plusLighter)
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
+                    )
                 }
               }
             }
             .padding(.vertical, 4)
           }
           Text(onboardingData.bio.isEmpty ? "No bio provided." : onboardingData.bio)
-            .font(.system(size: 15))
-            .foregroundColor(.white)
+            .font(.system(size: 17, weight: .regular, design: .rounded))
+            .foregroundColor(.primary)
             .padding(.top, 8)
             .lineLimit(3)
         }
-        .padding(20)
+        .padding(28)
         .background(
-          RoundedRectangle(cornerRadius: 24)
+          RoundedRectangle(cornerRadius: 36, style: .continuous)
             .fill(.ultraThinMaterial)
-            .shadow(radius: 8)
+            .opacity(0.65)
+            .overlay(
+              LinearGradient(
+                gradient: Gradient(colors: [
+                  Color.pink.opacity(0.18), Color.blue.opacity(0.14), Color.clear,
+                ]), startPoint: .topLeading, endPoint: .bottomTrailing
+              )
+              .blendMode(.plusLighter)
+            )
+            .shadow(color: .black.opacity(0.12), radius: 16, x: 0, y: 8)
         )
-        .padding(.horizontal, 12)
-        .padding(.bottom, 16)
-        HStack(spacing: 12) {
+        .padding(.horizontal, 18)
+        .padding(.bottom, 18)
+        HStack(spacing: 16) {
           Button(action: { showEdit = true }) {
             Text("Edit Profile")
-              .font(.system(size: 16, weight: .semibold))
-              .foregroundColor(.white)
+              .font(.system(size: 18, weight: .semibold, design: .rounded))
+              .foregroundColor(.primary)
               .frame(maxWidth: .infinity)
-              .padding(.vertical, 10)
-              .background(RoundedRectangle(cornerRadius: 24).fill(.ultraThinMaterial))
+              .padding(.vertical, 12)
+              .background(
+                Capsule()
+                  .fill(.ultraThinMaterial)
+                  .opacity(0.65)
+                  .overlay(
+                    LinearGradient(
+                      gradient: Gradient(colors: [
+                        Color.pink.opacity(0.18), Color.blue.opacity(0.14), Color.clear,
+                      ]), startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                    .blendMode(.plusLighter)
+                  )
+                  .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
+              )
           }
           Button(action: { showChat = true }) {
             Text("Chat with Gardener AI")
-              .font(.system(size: 16, weight: .semibold))
+              .font(.system(size: 18, weight: .semibold, design: .rounded))
               .foregroundColor(.white)
               .frame(maxWidth: .infinity)
-              .padding(.vertical, 10)
-              .background(RoundedRectangle(cornerRadius: 24).fill(.ultraThinMaterial))
+              .padding(.vertical, 12)
+              .background(
+                Capsule()
+                  .fill(
+                    LinearGradient(
+                      gradient: Gradient(colors: [
+                        Color.accentColor, Color(red: 128 / 255, green: 23 / 255, blue: 36 / 255),
+                      ]), startPoint: .leading, endPoint: .trailing)
+                  )
+                  .opacity(0.85)
+                  .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
+              )
           }
         }
-        .padding(.horizontal, 12)
-        .padding(.bottom, 32)
+        .padding(.horizontal, 18)
+        .padding(.bottom, 36)
       }
     }
     .edgesIgnoringSafeArea(.all)
     .sheet(isPresented: $showChat) {
-      ChatView()
+      ChatView(onboardingData: onboardingData)
     }
     .sheet(isPresented: $showEdit) {
       EditProfileView(onboardingData: onboardingData)
