@@ -7,7 +7,7 @@ import FoundationNetworking
 
 // Simple test to verify Supabase connection
 let supabaseURL = "https://ajuxvdtylcppakxipaus.supabase.co"
-let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdXh2ZHR5bGNwcGFreGlwYXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzU2NjIsImV4cCI6MjA1MDU1MTY2Mn0.VHcnKJtNUsyJCLKJJkEqUOhhdqrOHLfEqmkJYBGBKQs"
+let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdXh2ZHR5bGNwcGFreGlwYXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0ODI3MTgsImV4cCI6MjA2NTA1ODcxOH0.3ltHluC67rk23g3wNeUtYHgzvA7Es7nwlGU5m0Z8sW4"
 
 func testSupabaseConnection() {
     guard let url = URL(string: "\(supabaseURL)/rest/v1/") else {
@@ -19,7 +19,7 @@ func testSupabaseConnection() {
     request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue("application/json", forHTTPHeaderField: "Accept")
-    request.setValue("1", forHTTPHeaderField: "apikey")
+    request.setValue(anonKey, forHTTPHeaderField: "apikey")
     
     let semaphore = DispatchSemaphore(value: 0)
     
