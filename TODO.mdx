@@ -1,0 +1,84 @@
+# Harvest App: Development Roadmap
+
+This document outlines the features and technical plan to build a fully-featured version of the "Harvest" dating app.
+
+## Recommended Tech Stack
+
+To build a robust and scalable application efficiently, we will use the following technologies:
+
+- **Frontend**:
+  - **SwiftUI**: Continue using SwiftUI for a modern, declarative, and native iOS UI.
+
+- **Backend (Backend-as-a-Service)**:
+  - **Supabase**: An open-source Firebase alternative that uses a suite of powerful tools built on enterprise-grade technologies.
+    - **Database**: A dedicated **PostgreSQL** database, offering the full power of relational SQL for storing user profiles, swipes, matches, and chat messages.
+    - **Authentication**: **Supabase Auth** for secure sign-up, login (including social providers like Apple and Google), and user session management.
+    - **Storage**: **Supabase Storage** for securely uploading, storing, and serving user-provided assets like photos and videos.
+    - **Serverless Logic**: **Supabase Edge Functions** (Deno-based TypeScript) to run backend code for complex tasks like creating a match or sending a notification without managing a server.
+    - **Push Notifications**: We will trigger **Apple's Push Notification Service (APNs)** from an Edge Function to send real-time notifications for new matches and messages.
+
+---
+
+## Feature Development To-Do List
+
+Here's a breakdown of the tasks required to make "Harvest" a complete app using the recommended Supabase stack.
+
+### Phase 1: Core Backend & Authentication
+
+- [ ] **Set up Supabase Project**: Create a new project on the Supabase platform and integrate the Swift SDK into the Xcode project.
+- [ ] **Design Database Schema**:
+  - [ ] Define the tables in PostgreSQL (e.g., `users`, `swipes`, `matches`, `messages`).
+  - [ ] Set up table relationships and constraints.
+- [ ] **Implement User Authentication**:
+  - [ ] Connect the onboarding flow to create a new user in Supabase Auth.
+  - [ ] Create a "Welcome Back" / Login screen.
+  - [ ] Implement session persistence using the Supabase Swift client.
+  - [ ] Add a logout function in the profile screen.
+- [ ] **Profile Management Backend**:
+  - [ ] When a user completes onboarding, save their data to a new row in the `users` table.
+  - [ ] Implement logic to upload photos to a "profile-photos" bucket in Supabase Storage and save the URLs in the `users` table.
+  - [ ] Configure Row Level Security (RLS) policies on all tables to ensure users can only access and modify their own data.
+
+### Phase 2: Core Frontend Functionality
+
+- [ ] **Connect Frontend to Backend**:
+  - [ ] Modify the `OnboardingFlowView` to save the final `OnboardingData` to your Supabase backend.
+  - [ ] Update the `ProfileCardView` to fetch and display real user data from the `users` table.
+  - [ ] Implement the "Profile Edit" screen to read and write changes to the user's row in the `users` table.
+- [ ] **Implement Swiping & Matching**:
+  - [ ] Fetch a queue of potential matches from the `users` table based on user preferences.
+  - [ ] When a user swipes right (likes), insert a row into the `swipes` table.
+  - [ ] Create a Supabase Edge Function that triggers on a new "like." This function will check if the swipe is mutual.
+  - [ ] If it's a mutual like, create a "match" by inserting a new row into the `matches` table that links the two users.
+- [ ] **Display Matches**:
+  - [ ] Create a "Matches" screen or section.
+  - [ ] This screen will subscribe to real-time changes in the `matches` table and display a list of users you've matched with.
+
+### Phase 3: Real-Time Chat
+
+- [ ] **Chat Backend**:
+  - [ ] Set up the `messages` table with Row Level Security.
+  - [ ] Enable real-time functionality on the `messages` table.
+- [ ] **Chat UI**:
+  - [ ] When a user taps on a match, navigate them to the `ChatView`.
+  - [ ] The `ChatView` should subscribe to the `messages` table for that specific match to display messages in real-time.
+  - [ ] Implement the input field to send new messages by inserting rows into the `messages` table.
+  - [ ] Use Supabase's real-time presence feature to show when a user is online or typing.
+
+### Phase 4: Polish & Advanced Features
+
+- [ ] **Push Notifications**:
+  - [ ] Integrate the APNs SDK and request notification permissions from the user.
+  - [ ] Create an Edge Function that is called when a new match or message is created.
+  - [ ] This function will construct and send a payload to APNs to deliver a push notification to the correct user.
+- [ ] **Advanced Profile Features**:
+  - [ ] Implement user reporting and blocking functionality.
+  - [ ] Add more detailed profile fields (e.g., job, education, interests).
+  - [ ] Implement advanced filtering for matches (age range, distance, interests) using SQL queries.
+- [ ] **Monetization (Optional)**:
+  - [ ] Design premium features (e.g., "Super Likes," seeing who liked you, unlimited swipes).
+  - [ ] Integrate RevenueCat or StoreKit to handle in-app purchases and subscriptions, using a Supabase table to track user subscription status.
+- [ ] **UI/UX Refinement**:
+  - [ ] Add loading indicators for all network operations.
+  - [ ] Implement smooth animations and screen transitions.
+  - [ ] Conduct thorough testing on different devices and iOS versions. 

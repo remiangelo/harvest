@@ -3,6 +3,8 @@ import SwiftUI
 @main
 struct HarvestApp: App {
   @State private var showSplash = true
+  @StateObject private var authService = AuthenticationService()
+  
   var body: some Scene {
     WindowGroup {
       ZStack {
@@ -11,8 +13,13 @@ struct HarvestApp: App {
             .transition(.opacity)
             .zIndex(1)
         } else {
-          ContentView()
-            .transition(.opacity)
+          if authService.isAuthenticated {
+            MainAppView()
+              .environmentObject(authService)
+          } else {
+            AuthenticationView()
+              .environmentObject(authService)
+          }
         }
       }
       .onAppear {
